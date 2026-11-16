@@ -1,0 +1,24 @@
+# Rust / Cargo artifacts
+/target/
+**/*.rs.bk
+
+# Android / Gradle artifacts (Phase 4)
+.gradle/
+**/build/
+local.properties
+*.apk
+*.aab
+*.jks
+*.keystore
+
+# IDE & OS metadata
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Never commit environment secrets or local relay certs
+.env
+.env.*
+*.pem
+*.key

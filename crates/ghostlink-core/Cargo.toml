@@ -1,0 +1,40 @@
+[package]
+name = "ghostlink-core"
+description = "Zero-knowledge cryptographic identity, blind PAKE rendezvous, and stateless Noise E2EE core for GhostLink"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+# Inner E2EE session handshake & stateless ChaCha20-Poly1305 transport (pure-Rust default-resolver for Android NDK + Desktop)
+snow = { version = "0.9.6", default-features = false, features = ["default-resolver"] }
+
+# Password-Authenticated Key Exchange (Ed25519 group) for human-shareable Session ID + 6-digit PIN pairing
+spake2 = "0.4.0"
+
+# Blind signaling AEAD envelope encryption (hides WebRTC SDP / ICE IP metadata from signaling server)
+chacha20poly1305 = { version = "0.10.1", features = ["std"] }
+
+# Domain-separated HKDF-SHA256 key derivation & confirmation MACs
+hkdf = "0.12.4"
+sha2 = "0.10.8"
+
+# OS-backed CSPRNG compatible with rand_core 0.6
+rand = "0.8.5"
+
+# Deterministic zeroing of ephemeral private keys, PINs, and shared secrets on drop
+zeroize = { version = "1.8.1", features = ["derive"] }
+
+# Constant-time equality comparisons for MACs and pinned X25519 public keys
+subtle = "2.6.1"
+
+# Compact URL-safe Base64 encoding for blind room tokens and QR pairing URIs
+base64 = "0.22.1"
+
+# Structured, non-leaky error boundaries
+thiserror = "2.0.17"
