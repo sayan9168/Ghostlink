@@ -36,5 +36,11 @@ subtle = "2.6.1"
 # Compact URL-safe Base64 encoding for blind room tokens and QR pairing URIs
 base64 = "0.22.1"
 
+# Zero-copy reference-counted byte buffers for high-throughput NALU video datagrams
+bytes = { version = "1.9.0", features = ["serde"] }
+
+# Structured serialization traits for diagnostics, UI telemetry, and FFI inspectors
+serde = { version = "1.0.217", features = ["derive"] }
+
 # Structured, non-leaky error boundaries
 thiserror = "2.0.17"

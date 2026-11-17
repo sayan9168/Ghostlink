@@ -13,3 +13,6 @@
 
 /// Cryptographic identity, blind PAKE rendezvous, anti-replay, and stateless Noise E2EE engine.
 pub mod crypto;
+
+/// Bounded, zero-copy media datagram framing and deterministic binary control wire protocol.
+pub mod proto;
