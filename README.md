@@ -28,10 +28,29 @@ Input Injection                          Input Capture
 ↕                                        ↕
 [E2EE Layer] ←→ Signaling Server ←→ [E2EE Layer]
 (No-log relay)
-## 🚀 Quick Start
-1. Install GhostLink on Android device → Grant permissions → Get Device ID
-2. Install GhostLink Client on desktop → Enter Device ID
-3. Approve connection prompt on Android → Connected!
+## 🚧 Development status
+
+GhostLink is under development; the features above are design goals, not a
+shipped product. There are no desktop installers or end-to-end remote sessions yet.
+See [implementation status](docs/STATUS.md) for completed and remaining work.
+
+### Rust components
+
+Install a current stable Rust toolchain, then run:
+
+```sh
+cargo test --workspace
+cargo run -p ghostlink-signal
+```
+
+The signaling binary defaults to `0.0.0.0:8080`. Terminate TLS before exposing it
+publicly; a working signaling server alone does not provide remote screen sharing.
+
+### Android local capture milestone
+
+See [Android build and device-test instructions](android/README.md). This app
+requires visible local approval and currently discards encoded frames: nothing
+is transmitted or recorded. CI builds a debug APK, not a signed release.
 
 ## ⚠️ Security Notice
 GhostLink is designed for **authorized personal use only**. Always obtain explicit consent before connecting to any device. Unauthorized access is illegal and unethical.
