@@ -14,8 +14,8 @@ pub const VIDEO_HEADER_LEN: usize = 18;
 
 /// Maximum NALU slice payload carried inside one [`VideoDatagram`] (`1,400` bytes).
 ///
-/// Chosen so `18B Video + 8B Noise + 16B Poly1305 + SCTP/DTLS/UDP` stays safely below
-/// residential `1500B` Ethernet and `1460B` mobile 4G/5G CGNAT path MTUs.
+/// This is a protocol ceiling, not a path-MTU guarantee. The sender must choose
+/// a smaller payload when transport, encryption, or tunnel overhead requires it.
 pub const MAX_VIDEO_FRAGMENT_PAYLOAD_BYTES: usize = 1400;
 
 /// Hard upper bound on fragments per compressed video frame (`1,536` ≈ `2.05 MiB`).
