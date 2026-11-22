@@ -469,13 +469,11 @@ impl NoiseTransport {
             });
         }
 
-        let seq = match domain {
-            ChannelDomain::Control => self.ctrl_tx_seq.fetch_add(1, Ordering::Relaxed),
-            ChannelDomain::Media => self.media_tx_seq.fetch_add(1, Ordering::Relaxed),
+        let counter = match domain {
+            ChannelDomain::Control => &self.ctrl_tx_seq,
+            ChannelDomain::Media => &self.media_tx_seq,
         };
-        if seq >= MAX_CHANNEL_SEQ {
-            return Err(CryptoError::NonceExhausted);
-        }
+        let seq = reserve_sequence(counter)?;
 
         let domain_byte = domain.tag_byte();
         let noise_nonce = (u64::from(domain_byte) << 56) | seq;
@@ -571,5 +569,42 @@ impl fmt::Debug for NoiseTransport {
             .field("ctrl_tx_seq", &self.ctrl_tx_seq.load(Ordering::Relaxed))
             .field("media_tx_seq", &self.media_tx_seq.load(Ordering::Relaxed))
             .finish()
+    }
+}
+
+// Saturate at the sequence limit: failed sends must never wrap the counter and
+// eventually permit reuse of a nonce under the same transport key.
+fn reserve_sequence(counter: &AtomicU64) -> Result<u64, CryptoError> {
+    counter.fetch_update(Ordering::Relaxed, Ordering::Relaxed, |seq| {
+        if seq < MAX_CHANNEL_SEQ { Some(seq + 1) } else { None }
+    }).map_err(|_| CryptoError::NonceExhausted)
+}
+
+#[cfg(test)]
+mod sequence_tests {
+    use super::*;
+
+    #[test]
+    fn sequence_exhaustion_is_permanent() {
+        let counter = AtomicU64::new(MAX_CHANNEL_SEQ - 1);
+        assert_eq!(reserve_sequence(&counter).unwrap(), MAX_CHANNEL_SEQ - 1);
+        for _ in 0..3 {
+            assert!(matches!(reserve_sequence(&counter), Err(CryptoError::NonceExhausted)));
+            assert_eq!(counter.load(Ordering::Relaxed), MAX_CHANNEL_SEQ);
+        }
+    }
+
+    #[test]
+    fn concurrent_reservations_are_unique() {
+        let counter = AtomicU64::new(MAX_CHANNEL_SEQ - 2);
+        std::thread::scope(|scope| {
+            let a = scope.spawn(|| reserve_sequence(&counter));
+            let b = scope.spawn(|| reserve_sequence(&counter));
+            let c = scope.spawn(|| reserve_sequence(&counter));
+            let results = [a.join().unwrap(), b.join().unwrap(), c.join().unwrap()];
+            let mut values: Vec<_> = results.into_iter().filter_map(Result::ok).collect();
+            values.sort_unstable();
+            assert_eq!(values, vec![MAX_CHANNEL_SEQ - 2, MAX_CHANNEL_SEQ - 1]);
+        });
     }
 }

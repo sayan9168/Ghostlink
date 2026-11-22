@@ -15,6 +15,7 @@ use crate::crypto::{ChannelDomain, CryptoError, NoiseTransport};
 pub mod control;
 pub mod error;
 pub mod input;
+pub mod packetize;
 pub mod video;
 
 pub use control::{
